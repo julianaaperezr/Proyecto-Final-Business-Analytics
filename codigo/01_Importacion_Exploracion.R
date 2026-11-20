@@ -389,3 +389,122 @@ write.csv(
   "resultados/Tabla_3_Conversion_Fin_Semana.csv",
   row.names = FALSE
 )
+
+# Etapa 9: Comparacion de variables segun compra
+# Tabla 4: Comportamiento de navegacion segun resultado de compra
+tabla_navegacion <- Shoppers %>%
+  group_by(Revenue) %>%
+  summarise(
+    Sesiones = n(),
+    Prom_Administrative = mean(Administrative),
+    Prom_Informational = mean(Informational),
+    Prom_ProductRelated = mean(ProductRelated),
+    Prom_Administrative_Duration = mean(Administrative_Duration),
+    Prom_Informational_Duration = mean(Informational_Duration),
+    Prom_ProductRelated_Duration = mean(ProductRelated_Duration),
+    Prom_BounceRates = mean(BounceRates),
+    Prom_ExitRates = mean(ExitRates),
+    Prom_PageValues = mean(PageValues)
+  )
+
+# Mostrar tabla
+tabla_navegacion
+
+# Guardar tabla
+write.csv(
+  tabla_navegacion,
+  "resultados/Tabla_4_Comportamiento_Navegacion.csv",
+  row.names = FALSE
+)
+
+# Etapa 10: Graficas comparativas de navegacion
+# Grafico 7: Duracion en paginas de productos
+grafico7 <- ggplot(
+  Shoppers,
+  aes(x = Revenue, y = ProductRelated_Duration)
+) +
+  geom_boxplot(fill = "steelblue") +
+  scale_x_discrete(
+    labels = c("FALSE" = "Sin compra",
+               "TRUE" = "Con compra")
+  ) +
+  labs(
+    title = "Duracion en paginas de productos segun compra",
+    x = "Resultado de compra",
+    y = "Duracion en paginas de productos"
+  ) +
+  theme_minimal()
+
+grafico7
+
+ggsave(
+  "resultados/Grafico_7_Duracion_Productos.png",
+  plot = grafico7,
+  width = 9,
+  height = 6,
+  dpi = 300
+)
+
+# Grafico 8: Tasa de salida segun compra
+grafico8 <- ggplot(
+  Shoppers,
+  aes(x = Revenue, y = ExitRates)
+) +
+  geom_boxplot(fill = "steelblue") +
+  scale_x_discrete(
+    labels = c("FALSE" = "Sin compra",
+               "TRUE" = "Con compra")
+  ) +
+  labs(
+    title = "Tasa de salida segun resultado de compra",
+    x = "Resultado de compra",
+    y = "Tasa de salida"
+  ) +
+  theme_minimal()
+
+grafico8
+
+ggsave(
+  "resultados/Grafico_8_Tasa_Salida.png",
+  plot = grafico8,
+  width = 9,
+  height = 6,
+  dpi = 300
+)
+
+# Etapa 11: Preparacion de variables para los modelos
+# Crear una copia de la base original
+Shoppers_modelo <- Shoppers
+
+# Convertir la variable dependiente a numerica
+# 0 = Sin compra
+# 1 = Con compra
+Shoppers_modelo <- Shoppers_modelo %>%
+  mutate(
+    Compra = as.numeric(Revenue)
+  )
+
+# Convertir variables categoricas a factores
+Shoppers_modelo <- Shoppers_modelo %>%
+  mutate(
+    Month = as.factor(Month),
+    VisitorType = as.factor(VisitorType),
+    Weekend = as.factor(Weekend),
+    OperatingSystems = as.factor(OperatingSystems),
+    Browser = as.factor(Browser),
+    Region = as.factor(Region),
+    TrafficType = as.factor(TrafficType)
+  )
+
+# Revisar la estructura de la nueva base
+str(Shoppers_modelo)
+
+# Verificar la codificacion de la variable dependiente
+table(Shoppers_modelo$Compra)
+
+# Guardar la base preparada
+write.csv(
+  Shoppers_modelo,
+  "datos/online_shoppers_modelo.csv",
+  row.names = FALSE
+)
